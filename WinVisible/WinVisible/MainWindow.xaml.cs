@@ -20,9 +20,19 @@ namespace WinVisible
     /// </summary>
     public partial class MainWindow : Window
     {
+        //System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
+
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //var iconHandle = WinVisible.Properties.Resources.winvisible.Handle;
+            //this.nIcon.Icon = System.Drawing.Icon.FromHandle(iconHandle);
+            ////this.nIcon.ShowBalloonTip(5000, "Hi", "This is a BallonTip from Windows Notification", System.Windows.Forms.ToolTipIcon.Info);
+            //this.nIcon.Visible = true;
         }
     }
 }
