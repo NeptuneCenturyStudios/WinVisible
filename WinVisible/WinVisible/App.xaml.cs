@@ -5,9 +5,10 @@ using System.Data;
 
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-
+using WinVisible.Classes;
 
 namespace WinVisible
 {
@@ -23,8 +24,19 @@ namespace WinVisible
 
         public App()
         {
+            //initialize the tray icon
             InitializeTrayIcon();
-            
+
+            //start a background task to monitor windowed processes present on the desktop(s)
+            Task.Factory.StartNew(() => {
+
+                while (true)
+                {
+                    DesktopWindowEnumerator.EnumerateWindows();
+                    Thread.Sleep(2000);
+                }
+
+            });
         }
 
         /// <summary>
@@ -36,11 +48,11 @@ namespace WinVisible
             var iconHandle = WinVisible.Properties.Resources.winvisible.Handle;
 
             //set icon for tray icon
-            this._trayIcon.Icon = System.Drawing.Icon.FromHandle(iconHandle);
+            _trayIcon.Icon = System.Drawing.Icon.FromHandle(iconHandle);
             //set text
-            this._trayIcon.Text = "WinVisible";
+            _trayIcon.Text = "WinVisible";
             //ensure it's visible
-            this._trayIcon.Visible = true;
+            _trayIcon.Visible = true;
         }
 
     }

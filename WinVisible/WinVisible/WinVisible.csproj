@@ -69,8 +69,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Classes\DesktopWindowEnumerator.cs" />
     <Compile Include="Classes\GlobalHotKey.cs" />
     <Compile Include="Classes\ProcessItem.cs" />
+    <Compile Include="Classes\ProcessItemCollection.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

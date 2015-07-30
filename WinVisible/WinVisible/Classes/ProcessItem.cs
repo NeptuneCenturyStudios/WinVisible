@@ -11,5 +11,9 @@ namespace WinVisible.Classes
     /// </summary>
     class ProcessItem
     {
+        /// <summary>
+        /// Gets or sets the window handle hWnd
+        /// </summary>
+        public int WindowHandle { get; set; }
     }
 }
