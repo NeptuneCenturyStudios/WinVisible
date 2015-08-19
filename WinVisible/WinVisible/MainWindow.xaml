@@ -5,9 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WinVisible"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
+        Title="WinVisible" Height="350" Width="525"
         Loaded="Window_Loaded">
     <Grid>
-        
+        <ListView ItemsSource="{Binding Items}"
+                  >
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Title" DisplayMemberBinding="{Binding WindowText}" />
+                    <GridViewColumn Header="Handle" DisplayMemberBinding="{Binding WindowHandle}" />
+                    <GridViewColumn Header="Visible" DisplayMemberBinding="{Binding IsWindowVisible}" />
+                </GridView>
+            </ListView.View>
+
+        </ListView>
     </Grid>
 </Window>

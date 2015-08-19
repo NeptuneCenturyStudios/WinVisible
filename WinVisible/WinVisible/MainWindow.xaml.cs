@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WinVisible.Models;
 
 namespace WinVisible
 {
@@ -25,6 +26,9 @@ namespace WinVisible
         public MainWindow()
         {
             InitializeComponent();
+
+            //set context
+            DataContext = new MainWindowViewModel();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

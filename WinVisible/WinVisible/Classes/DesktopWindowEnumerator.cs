@@ -12,14 +12,23 @@ namespace WinVisible.Classes
     {
 
 
-        public delegate bool CallBackPtr(int hwnd, int lParam);
+        public delegate bool CallBackPtr(IntPtr hwnd, int lParam);
 
         private static List<ProcessItem> _currentList = new List<ProcessItem>();
-        private static CallBackPtr callBackPtr;
+        //private static CallBackPtr callBackPtr;
 
         #region Imports
         [DllImport("user32.dll")]
         private static extern int EnumWindows(CallBackPtr callPtr, int lPar);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
         #endregion
 
         #region Properties
@@ -36,10 +45,26 @@ namespace WinVisible.Classes
             _currentList.Clear();
 
             //create callback
-            callBackPtr = new CallBackPtr(EnumWindow);
+            //callBackPtr = new CallBackPtr(EnumWindow);
 
             //enumerate the windows
-            var ok = EnumWindows(callBackPtr, 0);
+            //var ok = EnumWindows(callBackPtr, 0);
+
+            var ok = 1;
+            var processes = Process.GetProcesses();
+            foreach (var process in processes)
+            {
+                if (process.MainWindowHandle != IntPtr.Zero)
+                {
+                    //collect all the windows into a list
+                    _currentList.Add(new ProcessItem()
+                    {
+                        WindowHandle = process.MainWindowHandle.ToInt32(),
+                        WindowText = process.MainWindowTitle.ToString(),
+                        IsWindowVisible = IsWindowVisible(process.MainWindowHandle)
+                    });
+                }
+            }
 
             if (ok == 1)
             {
@@ -58,13 +83,14 @@ namespace WinVisible.Classes
                 //now remove the ones not in current
                 foreach (var w in notInCurrent)
                 {
-                    Windows.Remove(w);
+                    App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Remove(w); }));
                 }
 
                 //add the ones not in collection
                 foreach (var w in notInCollection)
                 {
-                    Windows.Add(w);
+                    App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Add(w); }));
+
                 }
 
 
@@ -73,14 +99,24 @@ namespace WinVisible.Classes
         #endregion
 
         #region Private Methods
-        private static bool EnumWindow(int hwnd, int lParam)
+        private static bool EnumWindow(IntPtr hwnd, int lParam)
         {
             //Debug.WriteLine("Window handle is " + hwnd);
+
+            int len = GetWindowTextLength(hwnd);
+            var sb = new StringBuilder(len);
+            if (len > 0)
+            {
+                //get the window text
+                
+                GetWindowText(hwnd, sb, len + 1);
+            }
 
             //collect all the windows into a list
             _currentList.Add(new ProcessItem()
             {
-                WindowHandle = hwnd
+                WindowHandle = hwnd.ToInt32(),
+                WindowText = sb.ToString()
             });
 
             return true;
