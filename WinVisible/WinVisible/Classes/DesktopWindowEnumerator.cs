@@ -29,6 +29,9 @@ namespace WinVisible.Classes
 
         [DllImport("user32.dll")]
         private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("coredll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint lpdwProcessId);
         #endregion
 
         #region Properties
