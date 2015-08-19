@@ -15,7 +15,7 @@ namespace WinVisible.Classes
         public delegate bool CallBackPtr(IntPtr hwnd, int lParam);
 
         private static List<ProcessItem> _currentList = new List<ProcessItem>();
-        //private static CallBackPtr callBackPtr;
+        private static CallBackPtr callBackPtr;
 
         #region Imports
         [DllImport("user32.dll")]
@@ -44,57 +44,62 @@ namespace WinVisible.Classes
             //clear the current list
             _currentList.Clear();
 
-            //create callback
-            //callBackPtr = new CallBackPtr(EnumWindow);
-
-            //enumerate the windows
-            //var ok = EnumWindows(callBackPtr, 0);
-
-            var ok = 1;
-            var processes = Process.GetProcesses();
-            foreach (var process in processes)
+            if (true)
             {
-                if (process.MainWindowHandle != IntPtr.Zero)
+
+                //create callback
+                callBackPtr = new CallBackPtr(EnumWindow);
+
+                //enumerate the windows
+                var ok = EnumWindows(callBackPtr, 0);
+
+            }
+            else
+            {
+                var processes = Process.GetProcesses();
+                foreach (var process in processes)
                 {
-                    //collect all the windows into a list
-                    _currentList.Add(new ProcessItem()
+                    if (process.MainWindowHandle != IntPtr.Zero)
                     {
-                        WindowHandle = process.MainWindowHandle.ToInt32(),
-                        WindowText = process.MainWindowTitle.ToString(),
-                        IsWindowVisible = IsWindowVisible(process.MainWindowHandle)
-                    });
+                        //collect all the windows into a list
+                        _currentList.Add(new ProcessItem()
+                        {
+                            WindowHandle = process.MainWindowHandle.ToInt32(),
+                            WindowText = process.MainWindowTitle.ToString(),
+                            IsWindowVisible = IsWindowVisible(process.MainWindowHandle)
+                        });
+                    }
                 }
             }
 
-            if (ok == 1)
+
+            //compare the current list to the collection
+
+            //find the items in the current list that are not in the collection
+            var notInCollection = (from c in _currentList
+                                   where !(from w in Windows select w.WindowHandle).Contains(c.WindowHandle)
+                                   select c).ToArray();
+
+            //now find the ones in the Window list that are not in the current list
+            var notInCurrent = (from w in Windows
+                                where !(from c in _currentList select c.WindowHandle).Contains(w.WindowHandle)
+                                select w).ToArray();
+
+            //now remove the ones not in current
+            foreach (var w in notInCurrent)
             {
-                //compare the current list to the collection
+                App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Remove(w); }));
+            }
 
-                //find the items in the current list that are not in the collection
-                var notInCollection = (from c in _currentList
-                                       where !(from w in Windows select w.WindowHandle).Contains(c.WindowHandle)
-                                       select c).ToArray();
-
-                //now find the ones in the Window list that are not in the current list
-                var notInCurrent = (from w in Windows
-                                    where !(from c in _currentList select c.WindowHandle).Contains(w.WindowHandle)
-                                    select w).ToArray();
-
-                //now remove the ones not in current
-                foreach (var w in notInCurrent)
-                {
-                    App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Remove(w); }));
-                }
-
-                //add the ones not in collection
-                foreach (var w in notInCollection)
-                {
-                    App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Add(w); }));
-
-                }
-
+            //add the ones not in collection
+            foreach (var w in notInCollection)
+            {
+                App.Current.Dispatcher.BeginInvoke(new Action(() => { Windows.Add(w); }));
 
             }
+
+
+
         }
         #endregion
 
@@ -108,16 +113,18 @@ namespace WinVisible.Classes
             if (len > 0)
             {
                 //get the window text
-                
                 GetWindowText(hwnd, sb, len + 1);
+                //collect all the windows into a list
+                _currentList.Add(new ProcessItem()
+                {
+                    WindowHandle = hwnd.ToInt32(),
+                    WindowText = sb.ToString(),
+                    IsWindowVisible = IsWindowVisible(hwnd)
+                });
+
+
             }
 
-            //collect all the windows into a list
-            _currentList.Add(new ProcessItem()
-            {
-                WindowHandle = hwnd.ToInt32(),
-                WindowText = sb.ToString()
-            });
 
             return true;
         }
